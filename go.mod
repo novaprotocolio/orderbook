@@ -2,10 +2,6 @@ module github.com/novaprotocolio/orderbook
 
 go 1.12
 
-// replace github.com/ethereum/go-ethereum => ../../go-ethereum // v1.8.27
-
-replace github.com/golang/lint => golang.org/x/lint v0.0.0-20190409202823-959b441ac422
-
 require (
 	bazil.org/fuse v0.0.0-20180421153158-65cc252bf669 // indirect
 	github.com/alecthomas/gometalinter v3.0.0+incompatible // indirect
@@ -14,8 +10,7 @@ require (
 	github.com/deckarep/golang-set v1.7.1 // indirect
 	github.com/edsrzf/mmap-go v1.0.0 // indirect
 	github.com/elastic/gosigar v0.10.3 // indirect
-	//github.com/ethereum/go-ethereum v0.0.0-00010101000000-000000000000
-	github.com/ethereum/go-ethereum v1.8.27
+	github.com/ethereum/go-ethereum v0.0.0-00010101000000-000000000000
 	github.com/fatih/color v1.7.0
 	github.com/fjl/memsize v0.0.0-20180929194037-2a09253e352a // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
@@ -57,4 +52,6 @@ require (
 	gopkg.in/yaml.v2 v2.2.2 // indirect
 )
 
+replace github.com/ethereum/go-ethereum => ../../go-ethereum // v1.8.27
 
+replace github.com/golang/lint => golang.org/x/lint v0.0.0-20190409202823-959b441ac422
