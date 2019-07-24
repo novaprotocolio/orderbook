@@ -52,6 +52,6 @@ require (
 	gopkg.in/yaml.v2 v2.2.2 // indirect
 )
 
-replace github.com/ethereum/go-ethereum => ../../go-ethereum // v1.8.27
+replace github.com/ethereum/go-ethereum => ../../novalex // v1.8.27
 
 replace github.com/golang/lint => golang.org/x/lint v0.0.0-20190409202823-959b441ac422
