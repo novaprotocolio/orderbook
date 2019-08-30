@@ -2,76 +2,51 @@ package orderbook
 
 import (
 	"fmt"
+	demo "github.com/novaprotocolio/orderbook/common"
 	"math/big"
 	"strconv"
 	"strings"
-
-	demo "github.com/novaprotocolio/orderbook/common"
 )
 
-// Engine : singleton orderbook for testing
 type Engine struct {
-	Orderbooks map[string]*Orderbook
-	db         *BatchDatabase
-	// pair and max volume ...
+	Orderbooks   map[string]*Orderbook
+	db           *BatchDatabase
 	allowedPairs map[string]*big.Int
 }
 
 func NewEngine(datadir string, allowedPairs map[string]*big.Int) *Engine {
-	// demo.LogDebug("Creating model", "signerAddress", signer.Address().Hex())
-	batchDB := NewBatchDatabaseWithEncode(datadir, 0, 0,
-		EncodeBytesItem, DecodeBytesItem)
-
+	batchDB := NewBatchDatabaseWithEncode(datadir, 0, 0, EncodeBytesItem, DecodeBytesItem)
 	fixAllowedPairs := make(map[string]*big.Int)
 	for key, value := range allowedPairs {
 		fixAllowedPairs[strings.ToLower(key)] = value
 	}
-
-	orderbooks := &Engine{
-		Orderbooks:   make(map[string]*Orderbook),
-		db:           batchDB,
-		allowedPairs: fixAllowedPairs,
-	}
-
+	orderbooks := &Engine{Orderbooks: make(map[string]*Orderbook), db: batchDB, allowedPairs: fixAllowedPairs}
 	return orderbooks
 }
-
 func (engine *Engine) GetOrderbook(pairName string) (*Orderbook, error) {
 	return engine.getAndCreateIfNotExisted(pairName)
 }
-
 func (engine *Engine) hasOrderbook(name string) bool {
 	_, ok := engine.Orderbooks[name]
 	return ok
 }
-
-// commit for all orderbooks
 func (engine *Engine) Commit() error {
 	return engine.db.Commit()
 }
-
 func (engine *Engine) getAndCreateIfNotExisted(pairName string) (*Orderbook, error) {
-
 	name := strings.ToLower(pairName)
-
 	if !engine.hasOrderbook(name) {
-		// check allow pair
 		if _, ok := engine.allowedPairs[name]; !ok {
 			return nil, fmt.Errorf("Orderbook not found for pair :%s", pairName)
 		}
-
-		// then create one
 		ob := NewOrderbook(name, engine.db)
 		if ob != nil {
 			ob.Restore()
 			engine.Orderbooks[name] = ob
 		}
 	}
-
-	// return from map
 	return engine.Orderbooks[name], nil
 }
-
 func (engine *Engine) GetOrder(pairName, orderID string) *Order {
 	ob, _ := engine.getAndCreateIfNotExisted(pairName)
 	if ob == nil {
@@ -80,18 +55,13 @@ func (engine *Engine) GetOrder(pairName, orderID string) *Order {
 	key := GetKeyFromString(orderID)
 	return ob.GetOrder(key)
 }
-
 func (engine *Engine) ProcessOrder(quote map[string]string) ([]map[string]string, map[string]string) {
-
 	ob, _ := engine.getAndCreateIfNotExisted(quote["pair_name"])
 	var trades []map[string]string
 	var orderInBook map[string]string
-
 	if ob != nil {
-		// get map as general input, we can set format later to make sure there is no problem
 		orderID, err := strconv.ParseUint(quote["order_id"], 10, 64)
 		if err == nil {
-			// insert
 			if orderID == 0 {
 				demo.LogInfo("Process order")
 				trades, orderInBook = ob.ProcessOrder(quote, true)
@@ -104,29 +74,22 @@ func (engine *Engine) ProcessOrder(quote map[string]string) ([]map[string]string
 				}
 			}
 		}
-
 	} else {
 		demo.LogError("Market is not allowed")
 	}
-
 	return trades, orderInBook
-
 }
-
 func (engine *Engine) CancelOrder(quote map[string]string) error {
 	ob, err := engine.getAndCreateIfNotExisted(quote["pair_name"])
 	if ob != nil {
 		orderID, err := strconv.ParseUint(quote["order_id"], 10, 64)
 		if err == nil {
-
 			price, ok := new(big.Int).SetString(quote["price"], 10)
 			if !ok {
 				return fmt.Errorf("Price is not correct :%s", quote["price"])
 			}
-
 			return ob.CancelOrder(quote["side"], orderID, price)
 		}
 	}
-
 	return err
 }
