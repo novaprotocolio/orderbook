@@ -2,9 +2,15 @@ package orderbook
 
 import (
 	"encoding/json"
-	"github.com/ethereum/go-ethereum/common"
 	"math/big"
+
+	"github.com/ethereum/go-ethereum/common"
 )
+
+type Comparator func(a, b []byte) int
+type EncodeToBytes func(interface{}) ([]byte, error)
+type DecodeBytes func([]byte, interface{}) error
+type FormatBytes func([]byte) string
 
 const (
 	TrueByte  = byte(1)
